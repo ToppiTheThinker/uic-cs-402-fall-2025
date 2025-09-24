@@ -36,6 +36,8 @@ unsigned int get_rand_index(unsigned int len) {
 template<class T>
 concept Integral = is_integral<T>::value;
 
+template<Integral T>
+void binary_radix_sort_helper(vector<T> &list, bool descending = false);
 
 /* Bubble Sort */
 template<typename T>

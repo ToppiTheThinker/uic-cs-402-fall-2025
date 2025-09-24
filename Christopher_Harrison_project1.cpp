@@ -292,7 +292,80 @@ void bucket_merge_sort(vector<T> &list, bool descending) {
  */
 template<Integral T> 
 void binary_radix_sort(vector<T> &list, bool descending) {
-    // Your code here!
+    // Since C++ uses 2's compliment, we'll handle both cases.
+    vector<T> negatives;
+    vector<T> nonNegatives;
+    for (T val : list)
+        // we can flip the sign so we don't have to deal with 2's compliment
+        if (val < 0)
+            negatives.push_back(-1 * val);
+        else
+            nonNegatives.push_back(val);
+    binary_radix_sort_helper(negatives, !descending); // flip negatives!
+    binary_radix_sort_helper(nonNegatives, descending);
+    // flip the sign of negative numbers back
+    for (T& val : negatives)
+        val = -1 * val;
+    //append negatives to the front of nonNegatives or vice versa if descending
+    list.clear();
+    if (descending)
+    {
+        list.insert(list.end(), nonNegatives.begin(), nonNegatives.end());
+        list.insert(list.end(), negatives.begin(), negatives.end());
+    }
+    else
+    {
+        list.insert(list.end(), negatives.begin(), negatives.end());
+        list.insert(list.end(), nonNegatives.begin(), nonNegatives.end());   
+    }
+    
+}
+
+/* Binary Radix Helper
+ *
+ * Helper function for Binary Radix Sort. You will implement this to help with your
+ * Binary Radix Sort algorithm above.
+ *
+ */
+template<Integral T> 
+void binary_radix_sort_helper(vector<T> &list, bool descending) {
+    if (list.size() == 0) return;
+    T maxValue = list[0];
+    for (int i = 1; i < list.size(); i++)
+        if (list[i] > maxValue)
+            maxValue = list[i];
+    // to avoid doing unnecessary work ( counting sort on a bunch of just 0s ), we want to find the most significant 1 bit
+    // we can shift right until we hit 0 and track how many shifts
+    int maxBitsToSort = 0;
+    for (int i = maxValue; i > 0; i = i >> 1)
+        maxBitsToSort++;
+
+    // we only need to go maxBitsToSort times
+    for (int i = 0; i < maxBitsToSort; i++)
+    {
+        vector<T> zeroList;
+        vector<T> oneList;
+
+        for (T num : list)
+        {
+            if ((num >> i) & 1) // checks LEAST SIGNIFICANT BIT after shift!!
+                oneList.push_back(num);  //if the current bit is 1
+            else
+                zeroList.push_back(num); //if the current bit is 0
+        }
+
+        list.clear();
+        if (descending)
+        {
+            list.insert(list.end(), oneList.begin(), oneList.end());
+            list.insert(list.end(), zeroList.begin(), zeroList.end());
+        }
+        else
+        {
+            list.insert(list.end(), zeroList.begin(), zeroList.end());
+            list.insert(list.end(), oneList.begin(), oneList.end());
+        }
+    }
 }
 
 
@@ -365,13 +438,13 @@ int main() {
     /**** STUDENT CODE HERE ****/ 
 
 
-    std::vector<int> my_test_list {83, 12, 47, 29, 95, 4, 61, 38, 71, 56,
+    std::vector<int> my_test_list {83, 12, 47, 29, -95, 4, 61, 38, 71, 56,
                                9, 18, 66, 50, 34, 77, 25, 3, 88, 42,
-                               14, 97, 60, 5, 73, 27, 80, 19, 39, 91,
-                               7, 63, 36, 49, 10, 21, 54, 85, 31, 68,
-                               11, 44, 78, 2, 96, 16, 52, 33, 89, 40};
+                               14, 97, 60, -5, 73, -27, 80, 19, 39, 91,
+                               -7, 63, 36, 49, 10, 0, 54, 85, 31, 68,
+                               11, 44, -78, 2, 96, 16, 52, 33, 89, 40};
 
-    bubble_sort(my_test_list, false);
+    binary_radix_sort(my_test_list, false);
     std::cout << "[ "; for(int n : my_test_list) { std::cout << n << ' '; } std::cout << "]\n";
 
 
