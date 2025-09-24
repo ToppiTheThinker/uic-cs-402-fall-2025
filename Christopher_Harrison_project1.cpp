@@ -1,4 +1,3 @@
-
 #include "Christopher_Harrison_project1.h"
 #include "testing.h"
 
@@ -80,16 +79,6 @@ void bubble_sort(vector<T> &list, bool descending) {
 
 
 
-
-
-
-
-
-
-
-
-
-
 /* Selection Sort 
  *
  * 5 points
@@ -106,19 +95,33 @@ void bubble_sort(vector<T> &list, bool descending) {
  *                   in ascending order (the default)
  * */
 template<typename T>
-void selection_sort(vector<T> &list, bool descending) {
-    // Your code here!
+void selection_sort(std::vector<T> &list, bool descending) {
+  int n = list.size();
+    if (n <= 1) return; // No sorting needed
+
+    for (int i = 0; i < n - 1; i++) {
+        int swap_index = i; 
+        for (int j = i + 1; j < n; j++) {
+            if (descending) {
+                // If descending order, find the maximum
+                if (list[j] > list[swap_index]) {
+                    swap_index = j;
+                }
+            } else {
+                // If ascending order, find the minimum
+                if (list[j] < list[swap_index]) {
+                    swap_index = j;
+                }
+            }
+        }
+        // Swap with the first ith element 
+        if (swap_index != i) {
+            T temp = list[i];
+            list[i] = list[swap_index];
+            list[swap_index] = temp;
+        }
+    }
 }
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -164,10 +167,6 @@ void insertion_sort(vector<T> &list, bool descending)
 
 
 
-
-
-
-
 /* Quicksort
  *
  * 10 points
@@ -201,7 +200,7 @@ void quicksort(std::vector<T> &list, bool descending) {
  */
 template <typename T>
 std::vector<T> &quick_partition(std::vector<T> &list, bool descending) {
-  partition_helper(list, 0, list.size() - 1, descending);
+//   partition_helper(list, 0, list.size() - 1, descending);
   return list;
 }
 
@@ -214,6 +213,16 @@ void quicksort_helper(std::vector<T> &list, int low, int high,
     quicksort_helper(list, j + 1, high, descending);
   }
 }
+
+int random_num(int min, int max) {
+  std::random_device
+      rd;  // Hardware-based entropy (true randomness if supported)
+  std::mt19937 gen(rd());  // Mersenne Twister seeded with rd
+  std::uniform_int_distribution<> dis(
+      min, max);  // Uniform distribution in [min, max]
+  return dis(gen);
+}
+
 
 template <typename T>
 int partition_helper(std::vector<T> &list, int low, int high, bool descending) {
@@ -231,12 +240,6 @@ int partition_helper(std::vector<T> &list, int low, int high, bool descending) {
     std::swap(list[i], list[j]);
   }
 }
-
-
-
-
-
-
 
 
 
@@ -262,14 +265,6 @@ template<typename T>
 void merge_sort(vector<T> &list, bool decending) {
     // Your code here!
 }
-
-
-
-
-
-
-
-
 
 
 
@@ -411,7 +406,30 @@ void binary_radix_sort_helper(vector<T> &list, bool descending) {
  */
 template<typename T>
 void my_hybrid_sort(vector<T> &list, bool descending) {
-    // Quick sort into insertion sort
+    // Quick sort into insertion sort!
+    if (list.size() <= 1) return;
+    if (is_sorted(list.begin(), list.end())) return;
+    hybrid_helper(list, 0, list.size() - 1, descending);
+}
+
+template <typename T>
+void hybrid_helper(std::vector<T> &list, int low, int high, bool descending) {
+    if (high - low <= 32)
+    {
+        // not in place!
+        // if we wanted to make it in place we could change insertion sort to take in iterators.
+        vector<T> subList(list.begin() + low, list.begin() + high + 1);
+        insertion_sort(subList, descending);
+        //copies our sublist and replaces that part in list!
+        copy(subList.begin(), subList.end(), list.begin() + low);
+        return;
+    }
+    if (low < high) {
+    //we can still use partition helper from above!
+    int j = partition_helper(list, low, high, descending);
+    hybrid_helper(list, low, j, descending);
+    hybrid_helper(list, j + 1, high, descending);
+  }
 }
 
 
@@ -454,16 +472,6 @@ void radix_sort(vector<T> &list, unsigned int base, bool descending) {
 }
 
 
-int random_num(int min, int max) {
-  std::random_device
-      rd;  // Hardware-based entropy (true randomness if supported)
-  std::mt19937 gen(rd());  // Mersenne Twister seeded with rd
-  std::uniform_int_distribution<> dis(
-      min, max);  // Uniform distribution in [min, max]
-  return dis(gen);
-}
-
-
 
 int main() {
     /**** STUDENT CODE HERE ****/ 
@@ -476,7 +484,7 @@ int main() {
                                11, 44, -78, 2, 96, 16, 52, 33, -1232, 40};
 
     // binary_radix_sort(my_test_list, false);
-    binary_radix_sort(my_test_list, false);
+    quicksort(my_test_list, true);
     std::cout << "[ "; for(int n : my_test_list) { std::cout << n << ' '; } std::cout << "]\n";
 
 

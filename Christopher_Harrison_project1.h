@@ -31,6 +31,9 @@ void quicksort_helper(std::vector<T> &list, int low, int high, bool descending);
 template <typename T>
 int partition_helper(std::vector<T> &list, int low, int high, bool descending);
 
+template <typename T>
+void hybrid_helper(std::vector<T> &list, int low, int high, bool descending);
+
 /*** END STUDENT HELPER FUNCTIONS ***/
 
 
