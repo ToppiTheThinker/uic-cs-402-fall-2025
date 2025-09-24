@@ -168,30 +168,30 @@ void insertion_sort(vector<T> &list, bool descending)
 
 
 
-/* Quicksort 
+/* Quicksort
  *
  * 10 points
- * 
- * Algorithm: Sorts by first choosing a random pivot from the list, then 
- *            partitioning the list into two halves with respect to the 
+ *
+ * Algorithm: Sorts by first choosing a random pivot from the list, then
+ *            partitioning the list into two halves with respect to the
  *            pivot, then recursing on each half.
  *            This is an unstable sorting algorithm. Not required to be
  *            implemented as an in-place sort.
- *            
+ *
  *
  * Parameters:
- *  vector<T> &list: reference to a list of type T. You can assume this type
- *                   has all of the normal binary comparison operators such
- *                   as <, >, ==, !=, etc.
- *  bool decending:  if true, then sort in descending order; otherwise sort
+ *  std::vector<T> &list: reference to a list of type T. You can assume this
+ * type has all of the normal binary comparison operators such as <, >, ==, !=,
+ * etc. bool decending:  if true, then sort in descending order; otherwise sort
  *                   in ascending order (the default)
  *
  * */
-template<typename T>
-void quicksort(vector<T> &list, bool descending) {
-    // Your code here!
+template <typename T>
+void quicksort(std::vector<T> &list, bool descending) {
+  if (list.size() <= 1) return;
+  if (is_sorted(list.begin(), list.end())) return;
+  quicksort_helper(list, 0, list.size() - 1, descending);
 }
-
 
 /* Quick Partition
  *
@@ -199,12 +199,37 @@ void quicksort(vector<T> &list, bool descending) {
  * quicksort algorithm above.
  *
  */
-template<typename T>
-vector<T>& quick_partition(vector<T> &list, bool descending) {
-    // Your code here!
-    //
-    // You can use the helper function 
-    //      unsigned int get_rand_index(unsigned int len)
+template <typename T>
+std::vector<T> &quick_partition(std::vector<T> &list, bool descending) {
+  partition_helper(list, 0, list.size() - 1, descending);
+  return list;
+}
+
+template <typename T>
+void quicksort_helper(std::vector<T> &list, int low, int high,
+                      bool descending) {
+  if (low < high) {
+    int j = partition_helper(list, low, high, descending);
+    quicksort_helper(list, low, j, descending);
+    quicksort_helper(list, j + 1, high, descending);
+  }
+}
+
+template <typename T>
+int partition_helper(std::vector<T> &list, int low, int high, bool descending) {
+  std::swap(list[low], list[random_num(low, high)]);
+  T pivot = list[low];
+  int i = low - 1, j = high + 1;
+  while (true) {
+    do {
+      ++i;
+    } while (descending ? list[i] > pivot : list[i] < pivot);
+    do {
+      --j;
+    } while (descending ? list[j] < pivot : list[j] > pivot);
+    if (i >= j) return j;
+    std::swap(list[i], list[j]);
+  }
 }
 
 
@@ -318,7 +343,6 @@ void binary_radix_sort(vector<T> &list, bool descending) {
         list.insert(list.end(), negatives.begin(), negatives.end());
         list.insert(list.end(), nonNegatives.begin(), nonNegatives.end());   
     }
-    
 }
 
 /* Binary Radix Helper
@@ -327,7 +351,7 @@ void binary_radix_sort(vector<T> &list, bool descending) {
  * Binary Radix Sort algorithm above.
  *
  */
-template<Integral T> 
+template<typename T> 
 void binary_radix_sort_helper(vector<T> &list, bool descending) {
     if (list.size() == 0) return;
     T maxValue = list[0];
@@ -430,7 +454,14 @@ void radix_sort(vector<T> &list, unsigned int base, bool descending) {
 }
 
 
-
+int random_num(int min, int max) {
+  std::random_device
+      rd;  // Hardware-based entropy (true randomness if supported)
+  std::mt19937 gen(rd());  // Mersenne Twister seeded with rd
+  std::uniform_int_distribution<> dis(
+      min, max);  // Uniform distribution in [min, max]
+  return dis(gen);
+}
 
 
 
@@ -442,8 +473,9 @@ int main() {
                                9, 18, 66, 50, 34, 77, 25, 3, 88, 42,
                                14, 97, 60, -5, 73, -27, 80, 19, 39, 91,
                                -7, 63, 36, 49, 10, 0, 54, 85, 31, 68,
-                               11, 44, -78, 2, 96, 16, 52, 33, 89, 40};
+                               11, 44, -78, 2, 96, 16, 52, 33, -1232, 40};
 
+    // binary_radix_sort(my_test_list, false);
     binary_radix_sort(my_test_list, false);
     std::cout << "[ "; for(int n : my_test_list) { std::cout << n << ' '; } std::cout << "]\n";
 
@@ -458,7 +490,7 @@ int main() {
      *   - uncomment all lines below that begin with "//".
      *
      */
-    vector<int> test_list {1, 2, 3, 4, 5};
+    // vector<int> test_list {1, 2, 3, 4, 5};
     // bubble_sort(test_list);
     //selection_sort(test_list);
     //insertion_sort(test_list);

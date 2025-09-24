@@ -21,7 +21,15 @@ unsigned int get_rand_index(unsigned int len) {
 
 /*** STUDENT HELPER FUNCTIONS HERE ***/
 
+template<typename T>
+void binary_radix_sort_helper(vector<T> &list, bool descending = false);
 
+int random_num(int min, int max);
+template <typename T>
+void quicksort_helper(std::vector<T> &list, int low, int high, bool descending);
+
+template <typename T>
+int partition_helper(std::vector<T> &list, int low, int high, bool descending);
 
 /*** END STUDENT HELPER FUNCTIONS ***/
 
@@ -35,9 +43,6 @@ unsigned int get_rand_index(unsigned int len) {
 /** Helper type for integrals only **/
 template<class T>
 concept Integral = is_integral<T>::value;
-
-template<Integral T>
-void binary_radix_sort_helper(vector<T> &list, bool descending = false);
 
 /* Bubble Sort */
 template<typename T>
