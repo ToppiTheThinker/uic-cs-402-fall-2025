@@ -1,3 +1,197 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <functional>
+#include <algorithm>
+#include <chrono>
+
+// include your header with all the list generators
+#include "testing.h"
+
+// include the header with your sorting algorithms
+#include "Christopher_Harrison_project1.h"  // adjust to your actual file name
+
+using namespace std;
+
+#include "testing.h"
+
+
+
+/* Helper function to print vector */
+template<typename T>
+void print_list(vector<T>& list) {
+    std::cout << "[ ";
+    for(T n : list) {
+        std::cout << n << ' ';
+    }
+    std::cout << "]\n";
+}
+
+
+/* Generate shuffled list of integers from 0 to len-1 */
+vector<int> gen_unique_list(unsigned int len) {
+    vector<int> int_list {};
+    for(int i = 0; i < len; i++) {
+        int_list.push_back(i+1);
+    }
+
+    auto rd = random_device {};
+    auto rng = default_random_engine { rd() };
+
+    ranges::shuffle(int_list,rng);
+
+    return int_list;
+}
+
+/* Generate random list of integers of size len */
+vector<int> gen_random_list(unsigned int len) {
+
+    vector<int> int_list {};
+
+    srand(time({}));
+    for(int i = 0; i < len; i++) {
+        int_list.push_back(static_cast<int>(rand()));
+    }
+
+    return int_list;
+}
+
+/* Generate descending list of integers of size len */
+vector<int> gen_descending_list(unsigned int len) { 
+    vector<int> int_list {};
+    srand(time({}));
+    int start_int = static_cast<int>( (rand() % len)*((-1)^(rand() % 2))  );
+    for(int i = 0; i < len; i++) {
+        int_list.push_back(start_int);
+        --start_int;
+    }
+
+    return int_list;
+}
+
+/* Generates a list of ascending integers of size len */
+vector<int> gen_ascending_list(unsigned int len) { 
+    vector<int> int_list {};
+    srand(time({}));
+    int start_int = static_cast<int>( (rand() % len)*((-1)^(rand() % 2))  );
+    for(int i = 0; i < len; i++) {
+        int_list.push_back(start_int);
+        ++start_int;
+    }
+
+    return int_list;
+}
+
+
+/* Generates an ascending list with 3 random swaps */
+vector<int> gen_ascending_3swap_list(unsigned int len) {
+    vector<int> int_list = gen_ascending_list(len);
+    srand(time({}));
+    for(int i = 0; i < 3; i++) {
+        unsigned int swap_index1 = static_cast<unsigned int>( rand() % len );
+        unsigned int swap_index2 = static_cast<unsigned int>( rand() % len );
+
+        int temp = int_list[swap_index1];
+        int_list[swap_index1] = int_list[swap_index2];
+        int_list[swap_index2] = temp;
+    }
+    return int_list;
+}
+
+/* Genarates a list of all equal entries of length len */
+vector<int> gen_all_equal_list(unsigned int len) {
+    vector<int> int_list = {};
+    srand(time({}));
+    int choice = static_cast<int>( rand() );
+    for(int i = 0; i < len; i++) {
+        int_list.push_back(choice);
+    }
+
+    return int_list;
+}
+
+/* Generates list containing many duplicates of length len */
+vector<int> gen_many_dupes_list(unsigned int len) {
+    vector<int> int_list = {};
+    srand(time({}));
+    while(int_list.size() < len) {
+        unsigned int num_dupes = static_cast<unsigned int>( rand() % 17 );
+        int item = static_cast<int>( rand() );
+        for(int j = 0; j < num_dupes && int_list.size() < len; j++) {
+            int_list.push_back(item);
+        }
+    }
+
+    return int_list;
+}
+
+/* Generate ascending list with 1% of entries then randomly changed */
+vector<int> gen_one_percent_rand_list(unsigned int len) {
+    vector<int> int_list = gen_ascending_list(len);
+
+    unsigned int percent = ceil(len*.01);
+
+    srand(time({}));
+    for(int i = 0; i < percent; i++) {
+        unsigned int index = static_cast<unsigned int>( rand() % len );
+        unsigned int value = static_cast<int>( rand() );
+
+        int_list[index] = value;
+    }
+
+    return int_list;
+}
+
+
+/**** Student Tests Here ****/
+/* Feel free to write your own tests here! */
+
+/* Helper to check sorted order */
+template<typename T>
+bool is_sorted_order(const vector<T>& v, bool descending = false) {
+    if (v.empty()) return true;
+    if (descending) {
+        for (size_t i = 1; i < v.size(); i++) {
+            if (v[i-1] < v[i]) return false;
+        }
+    } else {
+        for (size_t i = 1; i < v.size(); i++) {
+            if (v[i-1] > v[i]) return false;
+        }
+    }
+    return true;
+}
+
+/* Run a test on a single sorting function (with timing) */
+template<typename T>
+void run_sort_test(
+    const string& name,
+    function<void(vector<T>&)> sorter,
+    const vector<T>& input,
+    bool descending)
+{
+    vector<T> data = input;
+
+    auto start = chrono::high_resolution_clock::now();
+    sorter(data);
+    auto end = chrono::high_resolution_clock::now();
+    chrono::duration<double, milli> elapsed = end - start;
+
+    bool ok = is_sorted_order(data, descending);
+    cout << "Test " << name << " on input size " << input.size()
+         << (descending ? " (desc)" : " (asc)") << ": "
+         << (ok ? "PASS" : "FAIL")
+         << " | Time: " << elapsed.count() << " ms\n";
+}
+
+
+
+
+
+
+
+
+
 #include "Christopher_Harrison_project1.h"
 #include "testing.h"
 
@@ -96,7 +290,7 @@ void bubble_sort(vector<T> &list, bool descending) {
  * */
 template<typename T>
 void selection_sort(std::vector<T> &list, bool descending) {
-    int n = list.size();
+  int n = list.size();
     if (n <= 1) return; // No sorting needed
 
     for (int i = 0; i < n - 1; i++) {
@@ -309,6 +503,7 @@ void merge_helper(std::vector<T> &left, std::vector<T> &right, std::vector<T> &l
 template <typename T>
 void modified_merge_helper(std::vector<T>& list, int left, int mid, int right, bool descending) {
     // For small segments simply do insertion sort
+    //TODO FIX THIS!!
     if (right - left <= 32) {
         insertion_sort_helper(list, left, right + 1, descending);
         return;
@@ -410,10 +605,12 @@ void bucket_merge_sort(std::vector<T> &list, bool descending) {
     for (int left = 0; left < size; left += 2 * n) {
         int mid = left + n - 1;
         int right = left + 2 * n - 1;
-        if (right >= size)
+        if (right >= size){
           right = size - 1;
-        if (mid < size - 1)
+        }
+        if (mid < size - 1) {
             modified_merge_helper(list, left, mid, right, descending);
+        }
     }
   }
 }
@@ -601,16 +798,46 @@ void radix_sort(vector<T> &list, unsigned int base, bool descending) {
 int main() {
     /**** STUDENT CODE HERE ****/ 
 
+    // generate test lists
+    vector<vector<int>> test_lists;
+    test_lists.push_back(gen_unique_list(20000));
+    test_lists.push_back(gen_random_list(20000));
+    test_lists.push_back(gen_descending_list(20000));
+    test_lists.push_back(gen_ascending_list(20000));
+    test_lists.push_back(gen_all_equal_list(20000));
+    test_lists.push_back(gen_many_dupes_list(20000));
+    test_lists.push_back(gen_one_percent_rand_list(20000));
 
-    std::vector<int> my_test_list {83, 12, 47, 29, -95, 4, 61, 38, 71, 56,
-                               9, 18, 66, 50, 34, 77, 25, 3, 88, 42,
-                               14, 97, 60, -5, 73, -27, 80, 19, 39, 91,
-                               -7, 63, 36, 49, 10, 0, 54, 85, 31, 68,
-                               11, 44, -78, 2, 96, 16, 52, 33, -1232, 40};
+    // sorting algorithms:
+    auto bubble_sort_asc = [](vector<int>& v){ bubble_sort(v, false); };
+    auto bubble_sort_desc = [](vector<int>& v){ bubble_sort(v, true); };
 
-    // binary_radix_sort(my_test_list, false);
-    bucket_merge_sort(my_test_list, true);
-    std::cout << "[ "; for(int n : my_test_list) { std::cout << n << ' '; } std::cout << "]\n";
+    auto selection_sort_asc = [](vector<int>& v){ selection_sort(v, false); };
+    auto selection_sort_desc = [](vector<int>& v){ selection_sort(v, true); };
+
+    auto insertion_sort_any = [](vector<int>& v){ insertion_sort(v); };
+    auto quicksort_any = [](vector<int>& v){ quicksort(v); };
+    auto merge_sort_any = [](vector<int>& v){ merge_sort(v); };
+    auto bucket_merge_sort_any = [](vector<int>& v){ bucket_merge_sort(v); };
+    auto binary_radix_sort_any = [](vector<int>& v){ binary_radix_sort(v); };
+    auto my_hybrid_sort_any = [](vector<int>& v){ my_hybrid_sort(v, false); };
+    // auto radix_sort_any = [](vector<int>& v){ radix_sort(v); };
+
+    // test them:
+    for (auto &list : test_lists) {
+        run_sort_test<int>("Bubble Sort Asc", bubble_sort_asc, list, false);
+        run_sort_test<int>("Bubble Sort Desc", bubble_sort_desc, list, true);
+        run_sort_test<int>("Selection Sort Asc", selection_sort_asc, list, false);
+        run_sort_test<int>("Selection Sort Desc", selection_sort_desc, list, true);
+        run_sort_test<int>("Insertion Sort", insertion_sort_any, list, false);
+        run_sort_test<int>("Quicksort", quicksort_any, list, false);
+        run_sort_test<int>("Merge Sort", merge_sort_any, list, false);
+        run_sort_test<int>("Bucket Merge Sort", bucket_merge_sort_any, list, false);
+        run_sort_test<int>("Binary Radix Sort", binary_radix_sort_any, list, false);
+        run_sort_test<int>("My Hybrid Sort", my_hybrid_sort_any, list, false);
+        // run_sort_test<int>("Radix Sort", radix_sort_any, list, false);
+        cout << "-----------------------------------\n";
+    }
 
 
     /**** END STUDENT CODE ****/

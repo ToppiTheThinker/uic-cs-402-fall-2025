@@ -34,6 +34,15 @@ int partition_helper(std::vector<T> &list, int low, int high, bool descending);
 template <typename T>
 void hybrid_helper(std::vector<T> &list, int low, int high, bool descending);
 
+template <typename T>
+void insertion_sort_helper(std::vector<T> &list, int start, int end, bool descending);
+
+template <typename T>
+void modified_merge_helper(std::vector<T>& list, int left, int mid, int right, bool descending);
+
+template <typename T>
+void merge_helper(std::vector<T> &left, std::vector<T> &right, std::vector<T> &list, bool descending);
+
 /*** END STUDENT HELPER FUNCTIONS ***/
 
 
