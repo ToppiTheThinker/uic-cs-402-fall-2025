@@ -35,6 +35,7 @@ using namespace std;
 
 /*** GROUP PROJECT ***/
 // Please list ALL of your other group members as comments below.
+// Me(Chris)
 //   Talha
 //   Manan
 
@@ -125,8 +126,6 @@ void selection_sort(std::vector<T> &list, bool descending) {
 
 
 
-
-
 /* Insertion Sort - Chris
  *
  * 5 points
@@ -159,11 +158,6 @@ void insertion_sort(vector<T> &list, bool descending)
 		list[j + 1] = unsortedVal;
 	}
 }
-
-
-
-
-
 
 
 
@@ -674,18 +668,6 @@ void radix_sort_helper(vector<T> &list, unsigned int base, bool descending) {
 int main() {
     /**** STUDENT CODE HERE ****/ 
 
-
-    std::vector<int> my_test_list {83, 12, 47, 29, -95, 4, 61, 38, 71, 56,
-                               9, 18, 66, 50, 34, 77, 25, 3, 88, 42,
-                               14, 97, 60, -5, 73, -27, 80, 19, 39, 91,
-                               -7, 63, 36, 49, 10, 0, 54, 85, 31, 68,
-                               11, 44, -78, 2, 96, 16, 52, 33, -1232, 40};
-
-    // binary_radix_sort(my_test_list, false);
-    radix_sort(my_test_list, 2, false);
-    std::cout << "[ "; for(int n : my_test_list) { std::cout << n << ' '; } std::cout << "]\n";
-
-
     /**** END STUDENT CODE ****/
 
     /***** DO NOT MODIFY BELOW THIS LINE *****/
@@ -696,16 +678,16 @@ int main() {
      *   - uncomment all lines below that begin with "//".
      *
      */
-    // vector<int> test_list {1, 2, 3, 4, 5};
-    // bubble_sort(test_list);
-    //selection_sort(test_list);
-    //insertion_sort(test_list);
-    //quicksort(test_list);
-    //merge_sort(test_list);
-    //bucket_merge_sort(test_list);
-    //binary_radix_sort(test_list);
-    //my_hybrid_sort(test_list);
-    //radix_sort(test_list);
+    vector<int> test_list {1, 2, 3, 4, 5};
+    bubble_sort(test_list);
+    selection_sort(test_list);
+    insertion_sort(test_list);
+    quicksort(test_list);
+    merge_sort(test_list);
+    bucket_merge_sort(test_list);
+    binary_radix_sort(test_list);
+    my_hybrid_sort(test_list);
+    radix_sort(test_list);
     return 0;
 }
 
