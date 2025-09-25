@@ -290,7 +290,7 @@ void bubble_sort(vector<T> &list, bool descending) {
  * */
 template<typename T>
 void selection_sort(std::vector<T> &list, bool descending) {
-  int n = list.size();
+    int n = list.size();
     if (n <= 1) return; // No sorting needed
 
     for (int i = 0; i < n - 1; i++) {
@@ -503,7 +503,6 @@ void merge_helper(std::vector<T> &left, std::vector<T> &right, std::vector<T> &l
 template <typename T>
 void modified_merge_helper(std::vector<T>& list, int left, int mid, int right, bool descending) {
     // For small segments simply do insertion sort
-    //TODO FIX THIS!!
     if (right - left <= 32) {
         insertion_sort_helper(list, left, right + 1, descending);
         return;
@@ -605,12 +604,10 @@ void bucket_merge_sort(std::vector<T> &list, bool descending) {
     for (int left = 0; left < size; left += 2 * n) {
         int mid = left + n - 1;
         int right = left + 2 * n - 1;
-        if (right >= size){
+        if (right >= size)
           right = size - 1;
-        }
-        if (mid < size - 1) {
+        if (mid < size - 1)
             modified_merge_helper(list, left, mid, right, descending);
-        }
     }
   }
 }
@@ -790,7 +787,76 @@ void hybrid_helper(std::vector<T> &list, int low, int high, bool descending) {
  */
 template<Integral T>
 void radix_sort(vector<T> &list, unsigned int base, bool descending) {
-    // Your code here!
+    // Since bases are weird, we'll handle both cases.
+    vector<T> negatives;
+    vector<T> nonNegatives;
+    for (T val : list)
+        if (val < 0)
+            negatives.push_back(-1 * val);
+        else
+            nonNegatives.push_back(val);
+    radix_sort_helper(negatives, base, !descending); // flip negatives!
+    radix_sort_helper(nonNegatives, base, descending);
+    // flip the sign of negative numbers back
+    for (T& val : negatives)
+        val = -1 * val;
+    //append negatives to the front of nonNegatives or vice versa if descending
+    list.clear();
+    if (descending)
+    {
+        list.insert(list.end(), nonNegatives.begin(), nonNegatives.end());
+        list.insert(list.end(), negatives.begin(), negatives.end());
+    }
+    else
+    {
+        list.insert(list.end(), negatives.begin(), negatives.end());
+        list.insert(list.end(), nonNegatives.begin(), nonNegatives.end());   
+    }
+}
+
+template<typename T>
+void radix_sort_helper(vector<T> &list, unsigned int base, bool descending) {
+    if (list.empty()) return;
+
+    // find max to know how many base-base digits
+    T maxValue = list[0];
+    for (int i = 1; i < list.size(); i++)
+        if (list[i] > maxValue)
+            maxValue = list[i];
+
+    // how many digits in this base
+    int numDigits = 0;
+    while (maxValue > 0) {
+        numDigits++;
+        maxValue /= base;
+    }
+
+    vector<vector<T>> buckets(base); // create base number of buckets
+// Process each digit
+    for (int digitPos = 0; digitPos < numDigits; digitPos++) {
+        // Clear all buckets
+        for (auto &b : buckets) b.clear();
+
+        // Place numbers into buckets based on current digit
+        for (T num : list) {
+            unsigned int digit = (num / static_cast<T>(pow(base, digitPos))) % base;
+            buckets[digit].push_back(num);
+        }
+
+        // Rebuild list from buckets
+        list.clear();
+        if (descending) {
+            // Concatenate in reverse order of digits
+            for (int d = base - 1; d >= 0; d--) {
+                list.insert(list.end(), buckets[d].begin(), buckets[d].end());
+            }
+        } else {
+            // Concatenate in ascending order of digits
+            for (int d = 0; d < static_cast<int>(base); d++) {
+                list.insert(list.end(), buckets[d].begin(), buckets[d].end());
+            }
+        }
+    }
 }
 
 
@@ -809,33 +875,27 @@ int main() {
     test_lists.push_back(gen_one_percent_rand_list(20000));
 
     // sorting algorithms:
-    auto bubble_sort_asc = [](vector<int>& v){ bubble_sort(v, false); };
-    auto bubble_sort_desc = [](vector<int>& v){ bubble_sort(v, true); };
-
-    auto selection_sort_asc = [](vector<int>& v){ selection_sort(v, false); };
-    auto selection_sort_desc = [](vector<int>& v){ selection_sort(v, true); };
-
+    auto bubble_sort_asc = [](vector<int>& v){ bubble_sort(v); };
+    auto selection_sort_asc = [](vector<int>& v){ selection_sort(v); };
     auto insertion_sort_any = [](vector<int>& v){ insertion_sort(v); };
     auto quicksort_any = [](vector<int>& v){ quicksort(v); };
     auto merge_sort_any = [](vector<int>& v){ merge_sort(v); };
     auto bucket_merge_sort_any = [](vector<int>& v){ bucket_merge_sort(v); };
     auto binary_radix_sort_any = [](vector<int>& v){ binary_radix_sort(v); };
     auto my_hybrid_sort_any = [](vector<int>& v){ my_hybrid_sort(v, false); };
-    // auto radix_sort_any = [](vector<int>& v){ radix_sort(v); };
+    auto radix_sort_any = [](vector<int>& v){ radix_sort(v, 10, false); };
 
     // test them:
     for (auto &list : test_lists) {
         run_sort_test<int>("Bubble Sort Asc", bubble_sort_asc, list, false);
-        run_sort_test<int>("Bubble Sort Desc", bubble_sort_desc, list, true);
         run_sort_test<int>("Selection Sort Asc", selection_sort_asc, list, false);
-        run_sort_test<int>("Selection Sort Desc", selection_sort_desc, list, true);
         run_sort_test<int>("Insertion Sort", insertion_sort_any, list, false);
         run_sort_test<int>("Quicksort", quicksort_any, list, false);
         run_sort_test<int>("Merge Sort", merge_sort_any, list, false);
         run_sort_test<int>("Bucket Merge Sort", bucket_merge_sort_any, list, false);
         run_sort_test<int>("Binary Radix Sort", binary_radix_sort_any, list, false);
         run_sort_test<int>("My Hybrid Sort", my_hybrid_sort_any, list, false);
-        // run_sort_test<int>("Radix Sort", radix_sort_any, list, false);
+        run_sort_test<int>("Radix Sort", radix_sort_any, list, false);
         cout << "-----------------------------------\n";
     }
 

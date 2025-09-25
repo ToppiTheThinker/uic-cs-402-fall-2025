@@ -593,9 +593,81 @@ void hybrid_helper(std::vector<T> &list, int low, int high, bool descending) {
  */
 template<Integral T>
 void radix_sort(vector<T> &list, unsigned int base, bool descending) {
-    // Your code here!
+    // Since bases are weird, we'll handle both cases.
+    vector<T> negatives;
+    vector<T> nonNegatives;
+    for (T val : list)
+        if (val < 0)
+            negatives.push_back(-1 * val);
+        else
+            nonNegatives.push_back(val);
+    radix_sort_helper(negatives, base, !descending); // flip negatives!
+    radix_sort_helper(nonNegatives, base, descending);
+    // flip the sign of negative numbers back
+    for (T& val : negatives)
+        val = -1 * val;
+    //append negatives to the front of nonNegatives or vice versa if descending
+    list.clear();
+    if (descending)
+    {
+        list.insert(list.end(), nonNegatives.begin(), nonNegatives.end());
+        list.insert(list.end(), negatives.begin(), negatives.end());
+    }
+    else
+    {
+        list.insert(list.end(), negatives.begin(), negatives.end());
+        list.insert(list.end(), nonNegatives.begin(), nonNegatives.end());   
+    }
 }
 
+template<typename T>
+void radix_sort_helper(vector<T> &list, unsigned int base, bool descending) {
+    if (list.empty()) return;
+
+    // find max to know how many base-base digits
+    T maxValue = list[0];
+    for (int i = 1; i < list.size(); i++)
+        if (list[i] > maxValue)
+            maxValue = list[i];
+
+    // how many digits in this base
+    int numDigits = 0;
+    while (maxValue > 0) {
+        numDigits++;
+        maxValue /= base;
+    }
+
+    vector<vector<T>> buckets(base); // create base number of buckets
+    // for loop for EACH digit
+    for (int digitPos = 0; digitPos < numDigits; digitPos++) {
+        //clear all buckets
+        for (auto &b : buckets)
+            b.clear();
+
+        // place numbers into buckets based on current digit
+        for (T num : list) {
+            // placevalue example: 100 in base 10 is 10^2, so the digitPos is 2 
+            T placeValue = pow(base, digitPos);
+            //shift digit right
+            T shiftedDigit = num / placeValue;
+            //get the last digit in this base
+            unsigned int digit = shiftedDigit % base; 
+            buckets[digit].push_back(num);
+        }
+
+        // Rebuild list from buckets
+        list.clear();
+        // insert the buckets to the end of the list!
+        if (descending) {
+            //reverse or if we are descending
+            for (int d = base - 1; d >= 0; d--)
+                list.insert(list.end(), buckets[d].begin(), buckets[d].end());
+        } else {
+            for (int d = 0; d < base; d++)
+                list.insert(list.end(), buckets[d].begin(), buckets[d].end());
+        }
+    }
+}
 
 
 int main() {
@@ -609,7 +681,7 @@ int main() {
                                11, 44, -78, 2, 96, 16, 52, 33, -1232, 40};
 
     // binary_radix_sort(my_test_list, false);
-    bucket_merge_sort(my_test_list, true);
+    radix_sort(my_test_list, 2, false);
     std::cout << "[ "; for(int n : my_test_list) { std::cout << n << ' '; } std::cout << "]\n";
 
 

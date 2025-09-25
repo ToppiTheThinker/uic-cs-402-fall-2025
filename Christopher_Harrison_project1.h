@@ -43,6 +43,9 @@ void modified_merge_helper(std::vector<T>& list, int left, int mid, int right, b
 template <typename T>
 void merge_helper(std::vector<T> &left, std::vector<T> &right, std::vector<T> &list, bool descending);
 
+template<typename T>
+void radix_sort_helper(vector<T> &list, unsigned int base, bool descending);
+
 /*** END STUDENT HELPER FUNCTIONS ***/
 
 
