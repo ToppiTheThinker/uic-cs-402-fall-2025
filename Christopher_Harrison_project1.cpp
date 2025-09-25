@@ -309,68 +309,68 @@ void merge_helper(std::vector<T> &left, std::vector<T> &right, std::vector<T> &l
 template <typename T>
 void modified_merge_helper(std::vector<T>& list, int left, int mid, int right, bool descending) {
     // For small segments simply do insertion sort
-    if (right - left <= 32) {
-        insertion_sort_helper(list, left, right + 1, descending);
-        return;
+  if (right - left <= 32) {
+    insertion_sort_helper(list, left, right + 1, descending);
+    return;
+  }
+
+  int i = left;     // left
+  int j = mid + 1;  // right
+
+  while (i <= mid && j <= right) {
+    bool advance_left = false;
+    // Check if we've exhausted the right segment
+    if (j > right) {
+      advance_left = true;
+    } else {
+      if (descending) {
+        // For descending order, keep list[i] if it's >= list[j]
+        if (list[i] >= list[j]) {
+          advance_left = true;
+        }
+      } else {
+        // For ascending order, keep list[i] if it's <= list[j]
+        if (list[i] <= list[j]) {
+          advance_left = true;
+        }
+      }
     }
 
-    int i = left;   // left 
-    int j = mid + 1; // right 
-
-    while (i <= mid && j <= right) {
-        bool advance_left = false;
-        // Check if we've exhausted the right segment
-        if (j > right) {
-            advance_left = true;
-        } else {
-            if (descending) {
-                // For descending order, keep list[i] if it's >= list[j]
-                if (list[i] >= list[j]) {
-                    advance_left = true;
-                }
-            } else {
-                // For ascending order, keep list[i] if it's <= list[j]
-                if (list[i] <= list[j]) {
-                    advance_left = true;
-                }
-            }
-        }
-
-        if (advance_left) {
-            // Just move to the left
-            ++i;
-        } else {
-            // Insert list[j] at position i and shift elements
-            T temp = list[j];
-            for (size_t k = j; k > i; --k) {
-                list[k] = list[k - 1];
-            }
-            list[i] = temp;
-            ++i;
-            ++j;
-            ++mid;
-        }
+    if (advance_left) {
+      // Just move to the left
+      ++i;
+    } else {
+      // Insert list[j] at position i and shift elements
+      T temp = list[j];
+      for (size_t k = j; k > i; --k) {
+        list[k] = list[k - 1];
+      }
+      list[i] = temp;
+      ++i;
+      ++j;
+      ++mid;
     }
+  }
 }
 
 template <typename T>
 void insertion_sort_helper(std::vector<T> &list, int start, int end, bool descending) {
-    for (int i = start + 1; i < end; i++) {
-        T key = list[i];
-        int j = i;
-        if (descending) {
-            while (j > start && list[j - 1] < key) {
-                list[j] = list[j - 1];
-                j--;
-            }
-        } else {
-            while (j > start && list[j - 1] > key) {
-                list[j] = list[j - 1];
-                j--;
-            }
-        }
-        list[j] = key;
+  for (int i = start + 1; i < end; i++) {
+    T key = list[i];
+    int j = i;
+    if (descending) {
+      while (j > start && list[j - 1] < key) {
+        list[j] = list[j - 1];
+        j--;
+      }
+    } else {
+      while (j > start && list[j - 1] > key) {
+        list[j] = list[j - 1];
+        j--;
+      }
     }
+    list[j] = key;
+  }
 }
 
 /* Bucket Merge Sort
@@ -398,22 +398,23 @@ void bucket_merge_sort(std::vector<T> &list, bool descending) {
   const int bucket_size = 32;
   int i = 0;
 
-  for (; i + bucket_size <= size; i += bucket_size){
+  for (; i + bucket_size <= size; i += bucket_size) {
     insertion_sort_helper(list, i, i + bucket_size, descending);
   }
 
   // For any remaining data
-  if (i < size)
-    insertion_sort_helper(list, i, size , descending);
+  if (i < size) {
+    insertion_sort_helper(list, i, size, descending);
+  }
 
   for (int n = bucket_size; n < size; n *= 2) {
     for (int left = 0; left < size; left += 2 * n) {
-        int mid = left + n - 1;
-        int right = left + 2 * n - 1;
-        if (right >= size)
-          right = size - 1;
-        if (mid < size - 1)
-            modified_merge_helper(list, left, mid, right, descending);
+      int mid = left + n - 1;
+      int right = left + 2 * n - 1;
+      if (right >= size)
+        right = size - 1;
+      if (mid < size - 1)
+        modified_merge_helper(list, left, mid, right, descending);
     }
   }
 }
