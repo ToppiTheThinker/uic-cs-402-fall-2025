@@ -3,7 +3,7 @@
 #include <random>
 
 // be sure to change FIRSTNAME and LASTNAME with your own first and last name
-#include "Firstname_Lastname_project2.h"
+#include "Christopher_Harrison_project2.h"
 
 using namespace std;
 
@@ -22,7 +22,7 @@ using namespace std;
  *   grading). These functions will be specified.
  *
  * - You are allowed to add helper functions. Be sure to add the appropriate
- *   function prototypes in "Fistname_Lastname_project2.h."
+ *   function prototypes in "Christopher_Harrison_project2.h."
  *
  * - The file "testing.cpp" has various functions you can utilize to test
  *   your code. You can also add your own tests!
@@ -168,7 +168,7 @@ vector<unsigned int> birthday_attack_2(function<unsigned short(unsigned int)> ha
  *    If multiple topological sortings exist, you only need to
  *    output a single one.
  *
- * Note: Edge is a struct defined in Firstname_Lastname_project2.h.
+ * Note: Edge is a struct defined in Christopher_Harrison_project2.h.
  *
  */
 
@@ -233,7 +233,7 @@ vector<int> dag_single_source(int n, vector<Edge> edges, int source) {
  *    (i.e., weight at least 0). For simplicity, all weights will be
  *    integers.
  * 
- * Note: Node is a struct defined in Firstname_Lastname_project2.h.
+ * Note: Node is a struct defined in Christopher_Harrison_project2.h.
  */
 
 
@@ -284,7 +284,7 @@ vector<Node> dijkstras_algorithm(int n, vector<Edge> edges, int source) {
  * a diagonal edge has a cost of 1.5, while moving along a cardinally adjacent  
  * edge (north, south, east, west) has a cost of 1.
  *
- * Note that GridEdge and GridNode are structs defined in Firstname_Lastname_project2.h.
+ * Note that GridEdge and GridNode are structs defined in Christopher_Harrison_project2.h.
  *
  * Input:
  *  - int m: number of columns (x-axis)
