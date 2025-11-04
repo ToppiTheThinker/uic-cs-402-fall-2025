@@ -78,17 +78,11 @@ using namespace std;
  */
 
 unsigned int sample_int() {
-    std::srand(time({})); 
-    return static_cast<unsigned int>(rand());
+    std::random_device rd;
+    std::mt19937 mt(rd());
+    std::uniform_int_distribution<unsigned int> dist(0);
+    return dist(mt);
 }
-
-// // Found one online because the original isn't working
-// unsigned int sample_int() {
-//     static std::mt19937 rng(std::random_device{}());
-//     static std::uniform_int_distribution<unsigned int> dist(
-//         0, std::numeric_limits<unsigned int>::max());
-//     return dist(rng);
-// }
 
 unsigned short test_hash(unsigned int input) {
     const unsigned int a = 3177205741;
@@ -155,10 +149,14 @@ vector<unsigned int> birthday_attack_1(function<unsigned short(unsigned int)> ha
  *   This means updating tort by hashing the previous value of tort once, and hare
  *   by computing the double hash of the previous value of hare (see the initialization
  *   as an example).
- *      tort -> 0
- * - Once tort == hare, check if hash(tort) == hash(hare). If not, take "one-step" with
- *   both tort and hare, until this condition is true.
+ * - Once tort == hare, reset tort = 0.
+ * - Now, while hash(tort) != hash(hare) take "one-step" with
+ *   both tort and hare, until hash(tort) == hash(hare).
  * - Output [tort, hare]
+ *
+ * Additional Resources
+ * - The following lecture notes explain both birthday attack algorithms:
+ *      https://people.cs.uchicago.edu/~davidcash/284-autumn-21/12-hash.pdf
  *
  * Hash Function Signature
  *   unsigned short test_hash(unsigned int input);
@@ -178,15 +176,17 @@ vector<unsigned int> birthday_attack_2(function<unsigned short(unsigned int)> ha
     unsigned int hare = hash_function(hash_function(0));
 
     while (tort != hare) {
-        hare = hash_function(hash_function(tort));
         tort = hash_function(tort);
+        hare = hash_function(hash_function(hare));
     }
-    while (hash_function(tort) == hash_function(hare)) {
+    tort = 0;
+    while (hash_function(tort) != hash_function(hare)) {
+        tort = hash_function(tort);
         hare = hash_function(hare);
-        tort = hash_function(tort);
     }
-    
-    return {};
+
+    vector<unsigned int> tortAndHare = {tort, hare};
+    return tortAndHare;
 }
 
 
@@ -409,7 +409,7 @@ int main() {
     cout << "Birthday Attack " << endl;
     for (int i = 0; i < 100; i++) {
         cout << "iteration " << i;
-        vector<unsigned int> out = birthday_attack_1(test_hash);
+        vector<unsigned int> out = birthday_attack_2(test_hash);
         if (out.size())
             cout << " success!" << endl;
         else
