@@ -1,6 +1,8 @@
 #include <functional>
 #include <limits.h>
 #include <random>
+#include <unordered_map>
+#include <iostream>
 
 // be sure to change FIRSTNAME and LASTNAME with your own first and last name
 #include "Christopher_Harrison_project2.h"
@@ -76,9 +78,17 @@ using namespace std;
  */
 
 unsigned int sample_int() {
-    std::srand(std::time({})); 
+    std::srand(time({})); 
     return static_cast<unsigned int>(rand());
 }
+
+// // Found one online because the original isn't working
+// unsigned int sample_int() {
+//     static std::mt19937 rng(std::random_device{}());
+//     static std::uniform_int_distribution<unsigned int> dist(
+//         0, std::numeric_limits<unsigned int>::max());
+//     return dist(rng);
+// }
 
 unsigned short test_hash(unsigned int input) {
     const unsigned int a = 3177205741;
@@ -95,6 +105,23 @@ vector<unsigned int> birthday_attack_1(function<unsigned short(unsigned int)> ha
     // signatures match the `test_hash` function signature.
     
     // Your code here!
+    for (int iterations = 0; iterations < 2; iterations++){
+        unordered_map<unsigned short, unsigned int> hashedValues;
+        for (int i = 0; i < 350; i++){
+            unsigned int currInt = sample_int();
+            unsigned short hashedCurr = hash_function(currInt);
+            // cout << hashedCurr << endl;
+            if (hashedValues.count(hashedCurr)) {
+                vector<unsigned int> collisionInts = {hashedValues.at(hashedCurr), currInt};
+                return collisionInts;
+            }
+            else {
+                hashedValues[hashedCurr] = currInt;
+            }
+
+        }
+    }
+    return {};
 }
 
 
@@ -128,6 +155,7 @@ vector<unsigned int> birthday_attack_1(function<unsigned short(unsigned int)> ha
  *   This means updating tort by hashing the previous value of tort once, and hare
  *   by computing the double hash of the previous value of hare (see the initialization
  *   as an example).
+ *      tort -> 0
  * - Once tort == hare, check if hash(tort) == hash(hare). If not, take "one-step" with
  *   both tort and hare, until this condition is true.
  * - Output [tort, hare]
@@ -143,8 +171,22 @@ vector<unsigned int> birthday_attack_2(function<unsigned short(unsigned int)> ha
     //     vector<unsigned int> out = birthday_attack_1(test_hash);
     // Note you can implement your own test hash functions so long as their 
     // signatures match the `test_hash` function signature.
-    
+
     // Your code here!
+
+    unsigned int tort = hash_function(0);
+    unsigned int hare = hash_function(hash_function(0));
+
+    while (tort != hare) {
+        hare = hash_function(hash_function(tort));
+        tort = hash_function(tort);
+    }
+    while (hash_function(tort) == hash_function(hare)) {
+        hare = hash_function(hare);
+        tort = hash_function(tort);
+    }
+    
+    return {};
 }
 
 
@@ -175,6 +217,7 @@ vector<unsigned int> birthday_attack_2(function<unsigned short(unsigned int)> ha
 
 vector<int> topological_sort(int n, vector<Edge> edges) {
     // Your code here!
+    return {};
 }
 
 
@@ -206,6 +249,7 @@ vector<int> topological_sort(int n, vector<Edge> edges) {
  *
  */
 vector<int> dag_single_source(int n, vector<Edge> edges, int source) {
+    return {};
 }
 
 
@@ -241,6 +285,7 @@ vector<Node> dijkstras_algorithm(int n, vector<Edge> edges, int source) {
     // Your code here!
     // Note: see the LeetCode from in-class for the problem "Cheapest Flights
     // K stops" to see how you can create a priority_queue with the Node struct.
+    return {};
 }
 
 
@@ -340,6 +385,7 @@ vector<Node> dijkstras_algorithm(int n, vector<Edge> edges, int source) {
 // You must implement this function.
 double heuristic_cost(GridNode start, GridNode dest) {
     // Your code here!
+    return -1;
 }
 
 // To test your algorithm with the function "heruistic_cost" above,
@@ -356,8 +402,19 @@ vector<GridNode> a_star_algorithm(
     // Your code here!
     // Be sure to use "h" from the inputs in your implementation; do not
     // directly use "heruistic_cost" above!
+    return {};
 }
 
 int main() {
+    cout << "Birthday Attack " << endl;
+    for (int i = 0; i < 100; i++) {
+        cout << "iteration " << i;
+        vector<unsigned int> out = birthday_attack_1(test_hash);
+        if (out.size())
+            cout << " success!" << endl;
+        else
+            cout << " Fail!" << endl;
+    }
+    cout << endl;
     return 0;
 }
