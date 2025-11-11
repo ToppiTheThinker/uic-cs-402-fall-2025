@@ -522,14 +522,21 @@ vector<GridNode> a_star_algorithm(
             continue;
         //otherwise update the cost
         for (auto& [v, w] : graph[currID]) {
-            if (curr.path_cost + w < finalNodes[v].path_cost) {
-                finalNodes[v].path_cost = curr.path_cost + w;
+            // store the path cost and weight
+            double g = finalNodes[currID].path_cost + w;
+            if (g < finalNodes[v].path_cost) {
+                finalNodes[v].path_cost = g;
                 finalNodes[v].pred_x = curr.x;
                 finalNodes[v].pred_y = curr.y;
-                min_queue.push({expand1D(m, v).first, expand1D(m, v).second, curr.path_cost + w + h(finalNodes[v], target), curr.x, curr.y});
+                min_queue.push({expand1D(m, v).first, expand1D(m, v).second, g + h(finalNodes[v], target), curr.x, curr.y});
             }
         }
     }
+
+    if (target.path_cost == infinity)
+        return {};
+    //YOU NEED TO RECONSTRUCT PATH
+    //
     return finalNodes;
 }
 
