@@ -3,6 +3,9 @@
 #include <random>
 #include <unordered_map>
 #include <iostream>
+#include <queue>
+#include <unordered_map>
+#include <utility>
 
 // be sure to change FIRSTNAME and LASTNAME with your own first and last name
 #include "Christopher_Harrison_project2.h"
@@ -216,8 +219,37 @@ vector<unsigned int> birthday_attack_2(function<unsigned short(unsigned int)> ha
 
 
 vector<int> topological_sort(int n, vector<Edge> edges) {
-    // Your code here!
-    return {};
+    queue<int> q;
+    vector<int> finalOrder;
+    vector<int> incomingEdges(n,0);
+    
+    //create an adjacency list
+    vector<vector<int>> adjList(n);
+    for (Edge e : edges) {
+        adjList[e.from].push_back(e.to);
+        incomingEdges[e.to]++;
+    }
+
+    for (int i = 0; i < n; i++)
+        if (incomingEdges[i] == 0)
+            q.push(i);
+
+    while (!q.empty()) {
+        int curr = q.front();
+        q.pop();
+        finalOrder.push_back(curr);
+        //remove an incoming edge count from each neighbor
+        for (int i = 0; i < adjList[curr].size(); i++) {
+            int neigh = adjList[curr][i];
+            incomingEdges[neigh]--;
+            if (incomingEdges[neigh] == 0)
+                q.push(neigh);
+        }
+    }
+    //if not everything is in the final vector there is a cycle
+    if (finalOrder.size() < n)
+        return {};
+    return finalOrder;
 }
 
 
@@ -249,7 +281,26 @@ vector<int> topological_sort(int n, vector<Edge> edges) {
  *
  */
 vector<int> dag_single_source(int n, vector<Edge> edges, int source) {
-    return {};
+    vector<int> pathWeights(n, INT_MAX);
+    queue<int> q;
+    //get the topo sort from the previous function
+    vector<int> topoSort = topological_sort(n, edges);
+
+    //create an adjacency list
+    vector<vector<pair<int,int>>> adjList(n);
+    for (Edge e : edges) {
+        adjList[e.from].push_back({e.to, e.weight});
+    }
+
+    pathWeights[source] = 0;
+    // calculate correct weights based on the topo sort
+    for (int node : topoSort)
+        if (pathWeights[node] != INT_MAX)
+            for (auto& [v,w] : adjList[node])
+                if (pathWeights[v] > pathWeights[node] + w)
+                    pathWeights[v] = pathWeights[node] + w;
+    
+    return pathWeights;
 }
 
 
@@ -282,10 +333,39 @@ vector<int> dag_single_source(int n, vector<Edge> edges, int source) {
 
 
 vector<Node> dijkstras_algorithm(int n, vector<Edge> edges, int source) {
-    // Your code here!
-    // Note: see the LeetCode from in-class for the problem "Cheapest Flights
-    // K stops" to see how you can create a priority_queue with the Node struct.
-    return {};
+    const int infinity = numeric_limits<int>::max();
+    //Create an adjaceny list as a graph
+    vector<vector<pair<int, int>>> graph(n);
+    for (Edge& e : edges)
+        graph[e.from].push_back({e.to, e.weight});
+    
+    // set every node cost to infinity and -1 as pred
+    vector<Node> finalNodes(n);
+    for (int i = 0; i < n; i++)
+        finalNodes[i] = {i, infinity, -1};
+
+    finalNodes[source].path_cost = 0;
+
+    priority_queue<Node, vector<Node>, greater<Node>> min_queue;
+    min_queue.push(finalNodes[source]);
+
+    while(!min_queue.empty()) {
+        Node curr = min_queue.top();
+        min_queue.pop();
+
+        //if the nodes current path cost > the path cost of the path we are on just skip
+        if (curr.path_cost > finalNodes[curr.id].path_cost)
+            continue;
+        //otherwise update the cost
+        for (auto& [i, w] : graph[curr.id]) {
+            if (curr.path_cost + w < finalNodes[i].path_cost) {
+                finalNodes[i].path_cost = curr.path_cost + w;
+                finalNodes[i].pred = curr.id;
+                min_queue.push({i, curr.path_cost + w, curr.id});
+            }
+        }
+    }
+    return finalNodes;
 }
 
 
@@ -388,6 +468,16 @@ double heuristic_cost(GridNode start, GridNode dest) {
     return -1;
 }
 
+int collapse2D(int m, int x, int y) {
+    return y * m + x;
+}
+
+pair<int,int> expand1D(int m, int index) {
+    int y = index / m;
+    int x = index % m;
+    return {x,y};
+}
+
 // To test your algorithm with the function "heruistic_cost" above,
 // simply pass "heuristic_cost" as a parameter to the function.
 vector<GridNode> a_star_algorithm(
@@ -402,7 +492,45 @@ vector<GridNode> a_star_algorithm(
     // Your code here!
     // Be sure to use "h" from the inputs in your implementation; do not
     // directly use "heruistic_cost" above!
-    return {};
+    const double infinity = numeric_limits<double>::max();
+    // adjaceny map. Given a coordinate -> returns a vector of coordinates and the weight to that coord
+    vector<vector<pair<int, double>>> graph(m * n);
+    for (GridEdge& e : edges) {
+        // if sum of distances is 2 then weight is 1.5 if its 1 then weight is 1
+        double weight = (abs(e.to_x - e.from_x) + abs(e.to_y - e.from_y) == 2) ? 1.5 : 1.0;
+        // add the collapsed coord and weight to the graph
+        graph[collapse2D(m,e.from_x,e.from_y)].push_back({collapse2D(m, e.to_x, e.to_y), weight});
+    }
+
+    // set every node cost to infinity and -1 as pred
+    vector<GridNode> finalNodes(m * n);
+    for (int i = 0; i < m * n; i++)
+        finalNodes[i] = {expand1D(m, i).first, expand1D(m, i).second, infinity, -1, -1};
+        
+    finalNodes[collapse2D(m, source.x, source.y)].path_cost = 0;
+    
+    priority_queue<GridNode, vector<GridNode>, greater<GridNode>> min_queue;
+    min_queue.push(finalNodes[collapse2D(m, source.x, source.y)]);
+
+    while(!min_queue.empty()) {
+        GridNode curr = min_queue.top();
+        min_queue.pop();
+        int currID = collapse2D(m, curr.x, curr.y);
+
+        //if the nodes current path cost > the path cost of the path we are on just skip
+        if (curr.path_cost > finalNodes[currID].path_cost)
+            continue;
+        //otherwise update the cost
+        for (auto& [v, w] : graph[currID]) {
+            if (curr.path_cost + w < finalNodes[v].path_cost) {
+                finalNodes[v].path_cost = curr.path_cost + w;
+                finalNodes[v].pred_x = curr.x;
+                finalNodes[v].pred_y = curr.y;
+                min_queue.push({expand1D(m, v).first, expand1D(m, v).second, curr.path_cost + w + h(finalNodes[v], target), curr.x, curr.y});
+            }
+        }
+    }
+    return finalNodes;
 }
 
 int main() {
