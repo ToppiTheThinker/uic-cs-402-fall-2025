@@ -445,6 +445,7 @@ vector<Node> dijkstras_algorithm(int n, vector<Edge> edges, int source) {
  *      - In A*, this is modified as: v.cost = u.cost + weight(u,v) + heuristic_cost(v, target),
  *        where heuristic_cost(v, target) is a heuristic distance from node v to the target node
  *        target.
+ *      - Note you also change the dijkstra's check to u.cost+weight(u,v)+heuristic_cost(v,target) < v.cost
  *  
  *  As part of your implementation of A*, you are required to implement the function
  *  heuristic_cost(GridNode start, GridNode dest) defined below. Your heuristic should never
@@ -464,8 +465,9 @@ vector<Node> dijkstras_algorithm(int n, vector<Edge> edges, int source) {
 
 // You must implement this function.
 double heuristic_cost(GridNode start, GridNode dest) {
-    // Your code here!
-    return -1;
+    int dx = abs(start.x - dest.x);
+    int dy = abs(start.y - dest.y);
+    return sqrt(dx*dx + dy*dy);
 }
 
 int collapse2D(int m, int x, int y) {
@@ -489,9 +491,6 @@ vector<GridNode> a_star_algorithm(
     function<double(GridNode,GridNode)> h
 ) 
 {
-    // Your code here!
-    // Be sure to use "h" from the inputs in your implementation; do not
-    // directly use "heruistic_cost" above!
     const double infinity = numeric_limits<double>::max();
     // adjaceny map. Given a coordinate -> returns a vector of coordinates and the weight to that coord
     vector<vector<pair<int, double>>> graph(m * n);
@@ -517,8 +516,7 @@ vector<GridNode> a_star_algorithm(
         min_queue.pop();
         int currID = collapse2D(m, curr.x, curr.y);
 
-        //if the nodes current path cost > the path cost of the path we are on just skip
-        if (curr.path_cost > finalNodes[currID].path_cost)
+        if (curr.path_cost > finalNodes[currID].path_cost + h(curr, target))
             continue;
         //otherwise update the cost
         for (auto& [v, w] : graph[currID]) {
@@ -528,28 +526,31 @@ vector<GridNode> a_star_algorithm(
                 finalNodes[v].path_cost = g;
                 finalNodes[v].pred_x = curr.x;
                 finalNodes[v].pred_y = curr.y;
-                min_queue.push({expand1D(m, v).first, expand1D(m, v).second, g + h(finalNodes[v], target), curr.x, curr.y});
+                min_queue.push({expand1D(m, v).first, expand1D(m, v).second, g + h(finalNodes[v],target), curr.x, curr.y});
             }
         }
     }
 
-    if (target.path_cost == infinity)
+    if (finalNodes[collapse2D(m, target.x, target.y)].path_cost == infinity)
         return {};
-    //YOU NEED TO RECONSTRUCT PATH
-    //
-    return finalNodes;
+
+    // reconstrucing path to return nodes from source to target
+    vector<GridNode> path;
+    GridNode curr = finalNodes[collapse2D(m, target.x, target.y)];
+
+    //go until source bc we are following predecessors
+    while (curr.x != source.x || curr.y != source.y) {
+        path.push_back(curr);
+        curr = finalNodes[collapse2D(m, curr.pred_x, curr.pred_y)];
+    }
+
+    // finally push source and reverse
+    path.push_back(finalNodes[collapse2D(m, source.x, source.y)]);
+    reverse(path.begin(), path.end());
+    
+    return path;
 }
 
 int main() {
-    cout << "Birthday Attack " << endl;
-    for (int i = 0; i < 100; i++) {
-        cout << "iteration " << i;
-        vector<unsigned int> out = birthday_attack_2(test_hash);
-        if (out.size())
-            cout << " success!" << endl;
-        else
-            cout << " Fail!" << endl;
-    }
-    cout << endl;
-    return 0;
+
 }
